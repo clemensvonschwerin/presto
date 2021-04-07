@@ -26,6 +26,7 @@ import static io.airlift.configuration.testing.ConfigAssertions.assertFullMappin
 import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
 import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertEquals;
 
 public class TestS3SecurityMappingConfig
 {
@@ -33,11 +34,20 @@ public class TestS3SecurityMappingConfig
     public void testDefaults()
     {
         assertRecordedDefaults(recordDefaults(S3SecurityMappingConfig.class)
+                .setConfigUri(null)
+                .setJSONPointer(null)
                 .setConfigFile(null)
                 .setRoleCredentialName(null)
                 .setKmsKeyIdCredentialName(null)
                 .setRefreshPeriod(null)
                 .setColonReplacement(null));
+    }
+
+    @Test
+    public void testDefaultValues()
+    {
+        S3SecurityMappingConfig defaultConfig = new S3SecurityMappingConfig();
+        assertEquals("/", defaultConfig.getJSONPointer());
     }
 
     @Test
@@ -48,6 +58,8 @@ public class TestS3SecurityMappingConfig
 
         Map<String, String> properties = new ImmutableMap.Builder<String, String>()
                 .put("hive.s3.security-mapping.config-file", securityMappingConfigFile.toString())
+                .put("hive.s3.security-mapping.json-pointer", "/data")
+                .put("hive.s3.security-mapping.config-uri", "http://test:1234/example")
                 .put("hive.s3.security-mapping.iam-role-credential-name", "iam-role-credential-name")
                 .put("hive.s3.security-mapping.kms-key-id-credential-name", "kms-key-id-credential-name")
                 .put("hive.s3.security-mapping.refresh-period", "1s")
@@ -56,6 +68,8 @@ public class TestS3SecurityMappingConfig
 
         S3SecurityMappingConfig expected = new S3SecurityMappingConfig()
                 .setConfigFile(securityMappingConfigFile.toFile())
+                .setJSONPointer("/data")
+                .setConfigUri("http://test:1234/example")
                 .setRoleCredentialName("iam-role-credential-name")
                 .setKmsKeyIdCredentialName("kms-key-id-credential-name")
                 .setRefreshPeriod(new Duration(1, SECONDS))

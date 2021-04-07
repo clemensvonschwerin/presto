@@ -169,7 +169,7 @@ The security mapping must provide one or more configuration settings:
   credential. If list cotains "*", then any key can be specified via extra credential.
 
 The security mapping entries are processed in the order listed in the configuration
-file. More specific mappings should thus be specified before less specific mappings.
+JSON. More specific mappings should thus be specified before less specific mappings.
 For example, the mapping list might have URL prefix ``s3://abc/xyz/`` followed by
 ``s3://abc/`` to allow different configuration for a specific path within a bucket
 than for other paths within the bucket. You can set default configuration by not
@@ -189,7 +189,11 @@ In addition to the rules above, the default mapping can contain the optional
 
 If no mapping entry matches and no default is configured, the access is denied.
 
-Example JSON configuration file:
+The configuration JSON can either be retrieved from a file specified via
+``hive.s3.security-mapping.config-file``or from a REST-endpoint specified via
+``hive.s3.security-mapping.config-uri``.
+
+Example JSON configuration:
 
 .. code-block:: json
 
@@ -235,6 +239,9 @@ Example JSON configuration file:
 Property Name                                           Description
 ======================================================= =================================================================
 ``hive.s3.security-mapping.config-file``                The JSON configuration file containing security mappings.
+``hive.s3.security-mapping.config-uri``                 The URI to fetch the security mappings from (via REST).
+``hive.s3.security-mapping.json-pointer``               A JSON pointer (RFC 6901) to mappings inside the JSON from either
+                                                        the config file or the config URI. The root ("/") by default.
 
 ``hive.s3.security-mapping.iam-role-credential-name``   The name of the *extra credential* used to provide the IAM role.
 
