@@ -47,7 +47,7 @@ public class TestS3SecurityMappingConfig
     public void testDefaultValues()
     {
         S3SecurityMappingConfig defaultConfig = new S3SecurityMappingConfig();
-        assertEquals("/", defaultConfig.getJSONPointer());
+        assertEquals("", defaultConfig.getJSONPointer());
     }
 
     @Test

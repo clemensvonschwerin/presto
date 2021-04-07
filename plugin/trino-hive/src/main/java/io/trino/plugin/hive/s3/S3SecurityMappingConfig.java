@@ -59,7 +59,7 @@ public class S3SecurityMappingConfig
 
     public String getJSONPointer()
     {
-        return jsonPointer == null ? "/" : jsonPointer;
+        return jsonPointer == null ? "" : jsonPointer;
     }
 
     @Config("hive.s3.security-mapping.json-pointer")

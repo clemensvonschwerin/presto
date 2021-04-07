@@ -241,7 +241,7 @@ Property Name                                           Description
 ``hive.s3.security-mapping.config-file``                The JSON configuration file containing security mappings.
 ``hive.s3.security-mapping.config-uri``                 The URI to fetch the security mappings from (via REST).
 ``hive.s3.security-mapping.json-pointer``               A JSON pointer (RFC 6901) to mappings inside the JSON from either
-                                                        the config file or the config URI. The root ("/") by default.
+                                                        the config file or the config URI. The whole document ("") by default.
 
 ``hive.s3.security-mapping.iam-role-credential-name``   The name of the *extra credential* used to provide the IAM role.
 
