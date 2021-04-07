@@ -24,6 +24,8 @@ import java.util.Optional;
 public class S3SecurityMappingConfig
 {
     private File configFile;
+    private String configUri;
+    private String jsonPointer;
     private String roleCredentialName;
     private String kmsKeyIdCredentialName;
     private Duration refreshPeriod;
@@ -39,6 +41,32 @@ public class S3SecurityMappingConfig
     public S3SecurityMappingConfig setConfigFile(File configFile)
     {
         this.configFile = configFile;
+        return this;
+    }
+
+    public Optional<String> getConfigUri()
+    {
+        return Optional.ofNullable(configUri);
+    }
+
+    @Config("hive.s3.security-mapping.config-uri")
+    @ConfigDescription("URI returning the security mappings as JSON")
+    public S3SecurityMappingConfig setConfigUri(String configUri)
+    {
+        this.configUri = configUri;
+        return this;
+    }
+
+    public String getJSONPointer()
+    {
+        return jsonPointer == null ? "/" : jsonPointer;
+    }
+
+    @Config("hive.s3.security-mapping.json-pointer")
+    @ConfigDescription("JSON pointer (RFC 6901) to mappings inside JSON config")
+    public S3SecurityMappingConfig setJSONPointer(String jsonPointer)
+    {
+        this.jsonPointer = jsonPointer;
         return this;
     }
 
