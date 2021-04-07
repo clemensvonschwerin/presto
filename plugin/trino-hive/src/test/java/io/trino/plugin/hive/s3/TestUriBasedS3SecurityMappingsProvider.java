@@ -20,11 +20,10 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 public class TestUriBasedS3SecurityMappingsProvider
 {
-
     @Test
     public void testGetRawJSON()
     {

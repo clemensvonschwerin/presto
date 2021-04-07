@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 import java.net.URI;
 import java.util.Optional;
 
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 public class TestS3SecurityMappingsProvider
 {
@@ -53,7 +53,6 @@ public class TestS3SecurityMappingsProvider
     public static class StubS3SecurityMappingsProvider
             extends S3SecurityMappingsProvider
     {
-
         public StubS3SecurityMappingsProvider(S3SecurityMappingConfig config)
         {
             super(config);

@@ -25,7 +25,6 @@ import static java.lang.String.format;
 public class UriBasedS3SecurityMappingsProvider
         extends S3SecurityMappingsProvider
 {
-
     public UriBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config)
     {
         super(config);

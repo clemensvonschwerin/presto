@@ -34,7 +34,6 @@ public class FileBasedS3SecurityMappingsProvider
     @Override
     public String getRawJSONString()
     {
-
         File configFile = this.config.getConfigFile().orElseThrow(() -> new IllegalArgumentException("hive.s3.security-mapping.config-file is not set"));
         log.info("Retrieving config from file %s", configFile);
         try {
