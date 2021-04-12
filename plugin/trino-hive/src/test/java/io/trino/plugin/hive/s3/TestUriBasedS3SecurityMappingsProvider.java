@@ -50,7 +50,7 @@ public class TestUriBasedS3SecurityMappingsProvider
         FakeServer()
                 throws IOException
         {
-            address = new InetSocketAddress(1234);
+            address = new InetSocketAddress("127.0.0.1", 1234);
             httpServer = HttpServer.create(address, 0);
             httpServer.createContext("/api/endpoint", exchange -> {
                 byte[] response = "{\"mappings\": [{\"iamRole\":\"arn:aws:iam::test\",\"user\":\"test\"}]}".getBytes(StandardCharsets.UTF_8);
