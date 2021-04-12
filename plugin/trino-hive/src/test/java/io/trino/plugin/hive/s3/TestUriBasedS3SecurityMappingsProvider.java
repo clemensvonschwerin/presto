@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 import static org.testng.Assert.assertEquals;
 
@@ -52,7 +53,7 @@ public class TestUriBasedS3SecurityMappingsProvider
             address = new InetSocketAddress(1234);
             httpServer = HttpServer.create(address, 0);
             httpServer.createContext("/api/endpoint", exchange -> {
-                byte[] response = "{\"mappings\": [{\"iamRole\":\"arn:aws:iam::test\",\"user\":\"test\"}]}".getBytes();
+                byte[] response = "{\"mappings\": [{\"iamRole\":\"arn:aws:iam::test\",\"user\":\"test\"}]}".getBytes(StandardCharsets.UTF_8);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
                 exchange.close();
