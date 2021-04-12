@@ -26,7 +26,7 @@ import static io.airlift.configuration.testing.ConfigAssertions.assertFullMappin
 import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
 import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 public class TestS3SecurityMappingConfig
 {
@@ -47,7 +47,7 @@ public class TestS3SecurityMappingConfig
     public void testDefaultValues()
     {
         S3SecurityMappingConfig defaultConfig = new S3SecurityMappingConfig();
-        assertEquals("", defaultConfig.getJSONPointer());
+        assertEquals(defaultConfig.getJSONPointer(), "");
     }
 
     @Test
