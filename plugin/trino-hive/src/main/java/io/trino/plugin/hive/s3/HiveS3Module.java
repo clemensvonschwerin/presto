@@ -61,7 +61,7 @@ public class HiveS3Module
 
     private void bindSecurityMapping(Binder binder)
     {
-        if (buildConfigObject(S3SecurityMappingConfig.class).getConfigFile().isPresent()) {
+        if (S3SecurityMappingsProviderFactory.isProviderAvailable(buildConfigObject(S3SecurityMappingConfig.class))) {
             checkArgument(!buildConfigObject(HiveConfig.class).isS3SelectPushdownEnabled(), "S3 security mapping is not compatible with S3 Select pushdown");
             checkArgument(!buildConfigObject(RubixEnabledConfig.class).isCacheEnabled(), "S3 security mapping is not compatible with Hive caching");
 

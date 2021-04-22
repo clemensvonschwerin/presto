@@ -13,17 +13,27 @@
  */
 package io.trino.plugin.hive.s3;
 
+import io.airlift.log.Logger;
+
 import java.util.List;
 
 public class S3SecurityMappingsProviderFactory
 {
+    private static final Logger log = Logger.get(S3SecurityMappingsProviderFactory.class);
+
     private S3SecurityMappingsProviderFactory()
     {}
+
+    private static long getNumberOfMatchingProviders(S3SecurityMappingConfig config)
+    {
+        List<S3SecurityMappingsProvider> providers = List.of(new FileBasedS3SecurityMappingsProvider(config), new UriBasedS3SecurityMappingsProvider(config));
+        return providers.stream().filter(S3SecurityMappingsProvider::checkPreconditions).count();
+    }
 
     public static S3SecurityMappingsProvider createMappingsProvider(S3SecurityMappingConfig config)
     {
         List<S3SecurityMappingsProvider> providers = List.of(new FileBasedS3SecurityMappingsProvider(config), new UriBasedS3SecurityMappingsProvider(config));
-        long matching = providers.stream().filter(S3SecurityMappingsProvider::checkPreconditions).count();
+        long matching = getNumberOfMatchingProviders(config);
         if (matching == 0) {
             throw new IllegalArgumentException("No provider available for current hive.s3.security-mapping configuration. " +
                     "Try to set either hive.s3.security-mapping.config-file or hive.s3.security-mapping.config-uri.");
@@ -35,5 +45,15 @@ public class S3SecurityMappingsProviderFactory
         else {
             return providers.stream().filter(S3SecurityMappingsProvider::checkPreconditions).findFirst().get();
         }
+    }
+
+    public static boolean isProviderAvailable(S3SecurityMappingConfig config)
+    {
+        long matching = getNumberOfMatchingProviders(config);
+        if (matching > 1L) {
+            log.warn("Ambiguous provider configuration in hive.s3.security-mapping. " +
+                    "Please set either hive.s3.security-mapping.config-file or hive.s3.security-mapping.config-uri.");
+        }
+        return matching == 1L;
     }
 }
