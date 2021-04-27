@@ -17,6 +17,9 @@ import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
 import io.airlift.configuration.validation.FileExists;
 import io.airlift.units.Duration;
+import org.codehaus.commons.nullanalysis.NotNull;
+
+import javax.validation.constraints.AssertTrue;
 
 import java.io.File;
 import java.util.Optional;
@@ -25,7 +28,7 @@ public class S3SecurityMappingConfig
 {
     private File configFile;
     private String configUri;
-    private String jsonPointer;
+    private String jsonPointer = "";
     private String roleCredentialName;
     private String kmsKeyIdCredentialName;
     private Duration refreshPeriod;
@@ -57,9 +60,16 @@ public class S3SecurityMappingConfig
         return this;
     }
 
+    @AssertTrue(message = "Cannot set both hive.s3.security-mapping.config-file and hive.s3.security-mapping.config-uri")
+    public boolean atMostOneProvider()
+    {
+        return getConfigFile().isEmpty() || getConfigUri().isEmpty();
+    }
+
+    @NotNull
     public String getJSONPointer()
     {
-        return jsonPointer == null ? "" : jsonPointer;
+        return jsonPointer;
     }
 
     @Config("hive.s3.security-mapping.json-pointer")

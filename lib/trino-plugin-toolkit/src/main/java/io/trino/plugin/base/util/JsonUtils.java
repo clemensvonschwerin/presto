@@ -14,6 +14,7 @@
 package io.trino.plugin.base.util;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -30,6 +31,10 @@ import static java.nio.file.Files.isReadable;
 
 public final class JsonUtils
 {
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapperProvider().get()
+            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
+
     private JsonUtils() {}
 
     public static <T> T parseJson(Path path, Class<T> javaType)
@@ -50,13 +55,20 @@ public final class JsonUtils
         }
     }
 
+    public static JsonNode parseJson(byte[] jsonBytes)
+    {
+        try {
+            return OBJECT_MAPPER.readTree(jsonBytes);
+        }
+        catch (IOException e) {
+            throw new IllegalArgumentException("Could not parse JSON node from given byte array", e);
+        }
+    }
+
     @VisibleForTesting
     static <T> T parseJson(byte[] jsonBytes, Class<T> javaType)
             throws IOException
     {
-        ObjectMapper mapper = new ObjectMapperProvider().get()
-                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
-        return mapper.readValue(jsonBytes, javaType);
+        return OBJECT_MAPPER.readValue(jsonBytes, javaType);
     }
 }

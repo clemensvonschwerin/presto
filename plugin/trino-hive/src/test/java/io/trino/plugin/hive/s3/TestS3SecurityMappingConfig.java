@@ -35,7 +35,7 @@ public class TestS3SecurityMappingConfig
     {
         assertRecordedDefaults(recordDefaults(S3SecurityMappingConfig.class)
                 .setConfigUri(null)
-                .setJSONPointer(null)
+                .setJSONPointer("")
                 .setConfigFile(null)
                 .setRoleCredentialName(null)
                 .setKmsKeyIdCredentialName(null)

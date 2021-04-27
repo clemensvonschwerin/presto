@@ -96,25 +96,6 @@ public class S3SecurityMapping
         this.endpoint = requireNonNull(endpoint, "endpoint is null");
     }
 
-    private static Predicate<URI> prefixPredicate(URI prefix)
-    {
-        checkArgument("s3".equals(prefix.getScheme()), "prefix URI scheme is not 's3': %s", prefix);
-        checkArgument(prefix.getQuery() == null, "prefix URI must not contain query: %s", prefix);
-        checkArgument(prefix.getFragment() == null, "prefix URI must not contain fragment: %s", prefix);
-        return value -> extractBucketName(prefix).equals(extractBucketName(value)) &&
-                value.getPath().startsWith(prefix.getPath());
-    }
-
-    private static Predicate<String> toPredicate(Pattern pattern)
-    {
-        return value -> pattern.matcher(value).matches();
-    }
-
-    private static <T> Predicate<Collection<T>> anyMatch(Predicate<T> predicate)
-    {
-        return values -> values.stream().anyMatch(predicate);
-    }
-
     public boolean matches(ConnectorIdentity identity, URI uri)
     {
         return user.test(identity.getUser())
@@ -172,5 +153,24 @@ public class S3SecurityMapping
                 .add("useClusterDefault", useClusterDefault)
                 .add("endpoint", endpoint.orElse(null))
                 .toString();
+    }
+
+    private static Predicate<URI> prefixPredicate(URI prefix)
+    {
+        checkArgument("s3".equals(prefix.getScheme()), "prefix URI scheme is not 's3': %s", prefix);
+        checkArgument(prefix.getQuery() == null, "prefix URI must not contain query: %s", prefix);
+        checkArgument(prefix.getFragment() == null, "prefix URI must not contain fragment: %s", prefix);
+        return value -> extractBucketName(prefix).equals(extractBucketName(value)) &&
+                value.getPath().startsWith(prefix.getPath());
+    }
+
+    private static Predicate<String> toPredicate(Pattern pattern)
+    {
+        return value -> pattern.matcher(value).matches();
+    }
+
+    private static <T> Predicate<Collection<T>> anyMatch(Predicate<T> predicate)
+    {
+        return values -> values.stream().anyMatch(predicate);
     }
 }

@@ -67,7 +67,8 @@ public class TestS3SecurityMapping
                 .setKmsKeyIdCredentialName(KMS_KEY_ID_CREDENTIAL_NAME)
                 .setColonReplacement("#");
 
-        DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig);
+        DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig,
+                new FileBasedS3SecurityMappingsProvider(mappingConfig));
 
         // matches prefix -- mapping provides credentials
         assertMapping(
@@ -248,7 +249,8 @@ public class TestS3SecurityMapping
         S3SecurityMappingConfig mappingConfig = new S3SecurityMappingConfig()
                 .setConfigFile(new File(getResource(getClass(), "security-mapping-with-fallback-to-cluster-default.json").getPath()));
 
-        DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig);
+        DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig,
+                new FileBasedS3SecurityMappingsProvider(mappingConfig));
 
         // matches prefix - returns role from the mapping
         assertMapping(
@@ -269,7 +271,8 @@ public class TestS3SecurityMapping
         S3SecurityMappingConfig mappingConfig = new S3SecurityMappingConfig()
                 .setConfigFile(new File(getResource(getClass(), "security-mapping-without-fallback.json").getPath()));
 
-        DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig);
+        DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig,
+                new FileBasedS3SecurityMappingsProvider(mappingConfig));
 
         // matches prefix - returns role from the mapping
         assertMapping(

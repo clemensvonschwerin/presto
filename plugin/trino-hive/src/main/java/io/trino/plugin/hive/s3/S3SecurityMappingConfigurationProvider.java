@@ -55,9 +55,9 @@ public class S3SecurityMappingConfigurationProvider
     private final Optional<String> colonReplacement;
 
     @Inject
-    public S3SecurityMappingConfigurationProvider(S3SecurityMappingConfig config)
+    public S3SecurityMappingConfigurationProvider(S3SecurityMappingConfig config, S3SecurityMappingsProvider mappingsProvider)
     {
-        this(getMappings(config), config.getRoleCredentialName(), config.getKmsKeyIdCredentialName(), config.getColonReplacement());
+        this(getMappings(config, mappingsProvider), config.getRoleCredentialName(), config.getKmsKeyIdCredentialName(), config.getColonReplacement());
     }
 
     public S3SecurityMappingConfigurationProvider(Supplier<S3SecurityMappings> mappings, Optional<String> roleCredentialName, Optional<String> kmsKeyIdCredentialName, Optional<String> colonReplacement)
@@ -68,9 +68,8 @@ public class S3SecurityMappingConfigurationProvider
         this.colonReplacement = requireNonNull(colonReplacement, "colonReplacement is null");
     }
 
-    private static Supplier<S3SecurityMappings> getMappings(S3SecurityMappingConfig config)
+    private static Supplier<S3SecurityMappings> getMappings(S3SecurityMappingConfig config, S3SecurityMappingsProvider supplier)
     {
-        S3SecurityMappingsProvider supplier = S3SecurityMappingsProviderFactory.createMappingsProvider(config);
         if (config.getRefreshPeriod().isEmpty()) {
             return Suppliers.memoize(supplier::get);
         }

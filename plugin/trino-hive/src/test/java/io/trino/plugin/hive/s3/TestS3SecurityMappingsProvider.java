@@ -59,7 +59,7 @@ public class TestS3SecurityMappingsProvider
         }
 
         @Override
-        protected String getRawJSONString()
+        protected String getRawJsonString()
         {
             return null;
         }

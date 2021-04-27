@@ -14,12 +14,11 @@
 package io.trino.plugin.hive.s3;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.airlift.json.ObjectMapperProvider;
+import io.trino.plugin.base.util.JsonUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static java.lang.String.format;
@@ -27,35 +26,32 @@ import static java.lang.String.format;
 public abstract class S3SecurityMappingsProvider
         implements Supplier<S3SecurityMappings>
 {
-    protected final S3SecurityMappingConfig config;
+    protected final String jsonPointer;
 
-    public S3SecurityMappingsProvider(S3SecurityMappingConfig config)
+    protected S3SecurityMappingsProvider(S3SecurityMappingConfig config)
     {
-        this.config = config;
+        this.jsonPointer = Objects.requireNonNull(config.getJSONPointer());
     }
 
     protected S3SecurityMappings parse(String jsonString)
     {
         try {
-            ObjectMapper mapper = new ObjectMapperProvider().get()
-                    .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
-            JsonNode node = mapper.readTree(jsonString);
-            JsonNode mappingsNode = node.at(config.getJSONPointer());
-            return mapper.treeToValue(mappingsNode, S3SecurityMappings.class);
+            JsonNode node = JsonUtils.parseJson(jsonString.getBytes(StandardCharsets.UTF_8));
+            JsonNode mappingsNode = node.at(this.jsonPointer);
+            return JsonUtils.OBJECT_MAPPER.treeToValue(mappingsNode, S3SecurityMappings.class);
         }
-        catch (JsonProcessingException ex) {
-            throw new IllegalArgumentException(format("Could not parse json input string '%s' as s3 security mappings", jsonString));
+        catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(format("Failed to parse JSON for S3 security mappings: %s", jsonString), e);
         }
     }
 
-    protected abstract String getRawJSONString();
+    protected abstract String getRawJsonString();
 
     public abstract boolean checkPreconditions();
 
     @Override
     public S3SecurityMappings get()
     {
-        return parse(getRawJSONString());
+        return parse(getRawJsonString());
     }
 }

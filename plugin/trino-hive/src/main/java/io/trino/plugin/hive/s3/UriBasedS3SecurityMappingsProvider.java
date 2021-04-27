@@ -13,56 +13,53 @@
  */
 package io.trino.plugin.hive.s3;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import io.airlift.http.client.HttpClient;
+import io.airlift.http.client.Request;
+import io.airlift.http.client.StringResponseHandler;
 
+import java.net.URI;
+
+import static io.airlift.http.client.Request.Builder.prepareGet;
+import static io.airlift.http.client.StringResponseHandler.createStringResponseHandler;
 import static java.lang.String.format;
 
 public class UriBasedS3SecurityMappingsProvider
         extends S3SecurityMappingsProvider
 {
-    public UriBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config)
+    private final URI configUri;
+    private HttpClient httpClient;
+
+    public UriBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config, @ForS3SecurityMapping HttpClient httpClient)
     {
         super(config);
+        this.configUri = config.getConfigUri().map(URI::create).orElse(null);
+        this.httpClient = httpClient;
     }
 
     @Override
-    protected String getRawJSONString()
+    protected String getRawJsonString()
     {
-        String urlString = config.getConfigUri().orElseThrow(() -> new IllegalArgumentException("hive.s3.security-mapping.config-uri file is not set"));
+        if (this.configUri == null) {
+            throw new IllegalArgumentException("hive.s3.security-mapping.config-uri file is not set");
+        }
+        Request request = prepareGet().setUri(this.configUri).build();
+        StringResponseHandler.StringResponse response;
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            int status = con.getResponseCode();
+            response = httpClient.execute(request, createStringResponseHandler());
+            int status = response.getStatusCode();
             if (200 <= status && status <= 299) {
-                try (BufferedReader in = new BufferedReader(
-                        new InputStreamReader(con.getInputStream()))) {
-                    String inputLine;
-                    StringBuilder content = new StringBuilder();
-                    while ((inputLine = in.readLine()) != null) {
-                        content.append(inputLine);
-                    }
-                    return content.toString();
-                }
+                return response.getBody();
             }
-            throw new IllegalStateException(format("Request to '%s' returned unexpected status code: '%d'", urlString, status));
+            throw new IllegalStateException(format("Request to '%s' returned unexpected status code: '%d'", this.configUri, status));
         }
-        catch (MalformedURLException ex) {
-            throw new IllegalArgumentException("hive.s3.security-mapping.config-uri is not a valid URL");
-        }
-        catch (IOException ex) {
-            throw new IllegalStateException(format("Error while sending get request to '%s': '%s'", urlString, ex.getMessage()));
+        catch (RuntimeException ex) {
+            throw new IllegalStateException(format("Error while sending get request to '%s'", this.configUri), ex);
         }
     }
 
     @Override
     public boolean checkPreconditions()
     {
-        return config.getConfigUri().isPresent();
+        return configUri != null;
     }
 }

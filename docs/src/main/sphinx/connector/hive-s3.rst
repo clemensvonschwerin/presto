@@ -190,7 +190,7 @@ In addition to the rules above, the default mapping can contain the optional
 If no mapping entry matches and no default is configured, the access is denied.
 
 The configuration JSON can either be retrieved from a file specified via
-``hive.s3.security-mapping.config-file``or from a REST-endpoint specified via
+``hive.s3.security-mapping.config-file`` or from a REST-endpoint specified via
 ``hive.s3.security-mapping.config-uri``.
 
 Example JSON configuration:

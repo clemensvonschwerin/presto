@@ -13,59 +13,31 @@
  */
 package io.trino.plugin.hive.s3;
 
-import com.sun.net.httpserver.HttpServer;
+import io.airlift.http.client.HttpStatus;
+import io.airlift.http.client.Response;
+import io.airlift.http.client.testing.TestingHttpClient;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicReference;
 
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static io.airlift.http.client.testing.TestingResponse.mockResponse;
 import static org.testng.Assert.assertEquals;
 
 public class TestUriBasedS3SecurityMappingsProvider
 {
+    private static final String MOCK_MAPPINGS_RESPONSE =
+            "{\"mappings\": [{\"iamRole\":\"arn:aws:iam::test\",\"user\":\"test\"}]}";
+
     @Test
     public void testGetRawJSON()
     {
-        try (FakeServer server = new FakeServer()) {
-            S3SecurityMappingConfig conf = new S3SecurityMappingConfig()
-                    .setConfigUri("http://" + server.address.getHostString() + ":" + server.address.getPort() + "/api/endpoint");
-            UriBasedS3SecurityMappingsProvider provider =
-                    new UriBasedS3SecurityMappingsProvider(conf);
-            String result = provider.getRawJSONString();
-            assertEquals("{\"mappings\": [{\"iamRole\":\"arn:aws:iam::test\",\"user\":\"test\"}]}", result);
-        }
-        catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private static class FakeServer
-            implements AutoCloseable
-    {
-        HttpServer httpServer;
-        InetSocketAddress address;
-
-        FakeServer()
-                throws IOException
-        {
-            address = new InetSocketAddress("127.0.0.1", 1234);
-            httpServer = HttpServer.create(address, 0);
-            httpServer.createContext("/api/endpoint", exchange -> {
-                byte[] response = "{\"mappings\": [{\"iamRole\":\"arn:aws:iam::test\",\"user\":\"test\"}]}".getBytes(StandardCharsets.UTF_8);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-                exchange.close();
-            });
-            httpServer.start();
-        }
-
-        @Override
-        public void close()
-                throws Exception
-        {
-            httpServer.stop(0);
-        }
+        AtomicReference<Response> response = new AtomicReference<>(mockResponse(HttpStatus.OK, JSON_UTF_8, MOCK_MAPPINGS_RESPONSE));
+        S3SecurityMappingConfig conf = new S3SecurityMappingConfig().setConfigUri("http://test:1234/api/endpoint");
+        UriBasedS3SecurityMappingsProvider provider =
+                new UriBasedS3SecurityMappingsProvider(conf,
+                        new TestingHttpClient(request -> response.get()));
+        String result = provider.getRawJsonString();
+        assertEquals(MOCK_MAPPINGS_RESPONSE, result);
     }
 }

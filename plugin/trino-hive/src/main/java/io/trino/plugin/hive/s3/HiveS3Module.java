@@ -16,6 +16,7 @@ package io.trino.plugin.hive.s3;
 import com.google.inject.Binder;
 import com.google.inject.Scopes;
 import io.airlift.configuration.AbstractConfigurationAwareModule;
+import io.airlift.units.Duration;
 import io.trino.plugin.hive.ConfigurationInitializer;
 import io.trino.plugin.hive.DynamicConfigurationProvider;
 import io.trino.plugin.hive.HiveConfig;
@@ -23,15 +24,29 @@ import io.trino.plugin.hive.rubix.RubixEnabledConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.common.JavaUtils;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 import static io.airlift.configuration.ConfigBinder.configBinder;
+import static io.airlift.http.client.HttpClientBinder.httpClientBinder;
 import static org.weakref.jmx.guice.ExportBinder.newExporter;
 
 public class HiveS3Module
         extends AbstractConfigurationAwareModule
 {
     public static final String EMR_FS_CLASS_NAME = "com.amazon.ws.emr.hadoop.fs.EmrFileSystem";
+
+    private static void validateEmrFsClass()
+    {
+        // verify that the class exists
+        try {
+            Class.forName(EMR_FS_CLASS_NAME, true, JavaUtils.getClassLoader());
+        }
+        catch (ClassNotFoundException e) {
+            throw new RuntimeException("EMR File System class not found: " + EMR_FS_CLASS_NAME, e);
+        }
+    }
 
     @Override
     protected void setup(Binder binder)
@@ -61,24 +76,27 @@ public class HiveS3Module
 
     private void bindSecurityMapping(Binder binder)
     {
-        if (S3SecurityMappingsProviderFactory.isProviderAvailable(buildConfigObject(S3SecurityMappingConfig.class))) {
-            checkArgument(!buildConfigObject(HiveConfig.class).isS3SelectPushdownEnabled(), "S3 security mapping is not compatible with S3 Select pushdown");
-            checkArgument(!buildConfigObject(RubixEnabledConfig.class).isCacheEnabled(), "S3 security mapping is not compatible with Hive caching");
+        if (buildConfigObject(S3SecurityMappingConfig.class).getConfigFile().isPresent()) {
+            binder.bind(S3SecurityMappingsProvider.class).to(FileBasedS3SecurityMappingsProvider.class).in(Scopes.SINGLETON);
+        }
+        else if (buildConfigObject(S3SecurityMappingConfig.class).getConfigUri().isPresent()) {
+            binder.bind(S3SecurityMappingsProvider.class).to(UriBasedS3SecurityMappingsProvider.class).in(Scopes.SINGLETON);
+            httpClientBinder(binder).bindHttpClient("s3SecurityMapping", ForS3SecurityMapping.class)
+                    .withConfigDefaults(config -> config
+                            .setRequestTimeout(Duration.succinctDuration(10, TimeUnit.SECONDS))
+                            .setSelectorCount(1)
+                            .setMinThreads(1)
+                    );
+        }
+        else {
+            return;
+        }
 
-            newSetBinder(binder, DynamicConfigurationProvider.class).addBinding()
-                    .to(S3SecurityMappingConfigurationProvider.class).in(Scopes.SINGLETON);
-        }
-    }
+        newSetBinder(binder, DynamicConfigurationProvider.class).addBinding()
+                .to(S3SecurityMappingConfigurationProvider.class).in(Scopes.SINGLETON);
 
-    private static void validateEmrFsClass()
-    {
-        // verify that the class exists
-        try {
-            Class.forName(EMR_FS_CLASS_NAME, true, JavaUtils.getClassLoader());
-        }
-        catch (ClassNotFoundException e) {
-            throw new RuntimeException("EMR File System class not found: " + EMR_FS_CLASS_NAME, e);
-        }
+        checkArgument(!buildConfigObject(HiveConfig.class).isS3SelectPushdownEnabled(), "S3 security mapping is not compatible with S3 Select pushdown");
+        checkArgument(!buildConfigObject(RubixEnabledConfig.class).isCacheEnabled(), "S3 security mapping is not compatible with Hive caching");
     }
 
     public static class EmrFsS3ConfigurationInitializer

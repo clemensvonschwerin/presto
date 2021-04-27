@@ -25,16 +25,20 @@ public class FileBasedS3SecurityMappingsProvider
         extends S3SecurityMappingsProvider
 {
     private static final Logger log = Logger.get(FileBasedS3SecurityMappingsProvider.class);
+    private final File configFile;
 
     public FileBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config)
     {
         super(config);
+        configFile = config.getConfigFile().orElse(null);
     }
 
     @Override
-    public String getRawJSONString()
+    public String getRawJsonString()
     {
-        File configFile = this.config.getConfigFile().orElseThrow(() -> new IllegalArgumentException("hive.s3.security-mapping.config-file is not set"));
+        if (this.configFile == null) {
+            throw new IllegalArgumentException("hive.s3.security-mapping.config-file is not set");
+        }
         log.info("Retrieving config from file %s", configFile);
         try {
             return Files.readString(configFile.toPath());
@@ -47,6 +51,6 @@ public class FileBasedS3SecurityMappingsProvider
     @Override
     public boolean checkPreconditions()
     {
-        return this.config.getConfigFile().isPresent();
+        return configFile != null;
     }
 }
