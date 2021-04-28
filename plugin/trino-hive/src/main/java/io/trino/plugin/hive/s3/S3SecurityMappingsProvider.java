@@ -18,10 +18,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.trino.plugin.base.util.JsonUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 public abstract class S3SecurityMappingsProvider
         implements Supplier<S3SecurityMappings>
@@ -30,7 +30,7 @@ public abstract class S3SecurityMappingsProvider
 
     protected S3SecurityMappingsProvider(S3SecurityMappingConfig config)
     {
-        this.jsonPointer = Objects.requireNonNull(config.getJSONPointer());
+        this.jsonPointer = requireNonNull(config.getJSONPointer());
     }
 
     protected S3SecurityMappings parse(String jsonString)

@@ -85,8 +85,7 @@ public class HiveS3Module
                     .withConfigDefaults(config -> config
                             .setRequestTimeout(Duration.succinctDuration(10, TimeUnit.SECONDS))
                             .setSelectorCount(1)
-                            .setMinThreads(1)
-                    );
+                            .setMinThreads(1));
         }
         else {
             return;
