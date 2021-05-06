@@ -13,14 +13,11 @@
  */
 package io.trino.plugin.hive.s3;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.trino.plugin.base.util.JsonUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 public abstract class S3SecurityMappingsProvider
@@ -30,24 +27,17 @@ public abstract class S3SecurityMappingsProvider
 
     protected S3SecurityMappingsProvider(S3SecurityMappingConfig config)
     {
-        this.jsonPointer = requireNonNull(config.getJSONPointer());
+        this.jsonPointer = requireNonNull(config.getJsonPointer());
     }
 
     protected S3SecurityMappings parse(String jsonString)
     {
-        try {
-            JsonNode node = JsonUtils.parseJson(jsonString.getBytes(StandardCharsets.UTF_8));
-            JsonNode mappingsNode = node.at(this.jsonPointer);
-            return JsonUtils.OBJECT_MAPPER.treeToValue(mappingsNode, S3SecurityMappings.class);
-        }
-        catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(format("Failed to parse JSON for S3 security mappings: %s", jsonString), e);
-        }
+        JsonNode node = JsonUtils.parseJson(jsonString);
+        JsonNode mappingsNode = node.at(this.jsonPointer);
+        return JsonUtils.jsonTreeToValue(mappingsNode, S3SecurityMappings.class);
     }
 
     protected abstract String getRawJsonString();
-
-    public abstract boolean checkPreconditions();
 
     @Override
     public S3SecurityMappings get()

@@ -14,52 +14,39 @@
 package io.trino.plugin.hive.s3;
 
 import io.airlift.http.client.HttpClient;
+import io.airlift.http.client.HttpStatus;
 import io.airlift.http.client.Request;
-import io.airlift.http.client.StringResponseHandler;
+import io.airlift.http.client.StringResponseHandler.StringResponse;
 
 import java.net.URI;
 
 import static io.airlift.http.client.Request.Builder.prepareGet;
 import static io.airlift.http.client.StringResponseHandler.createStringResponseHandler;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 public class UriBasedS3SecurityMappingsProvider
         extends S3SecurityMappingsProvider
 {
     private final URI configUri;
-    private HttpClient httpClient;
+    private final HttpClient httpClient;
 
     public UriBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config, @ForS3SecurityMapping HttpClient httpClient)
     {
         super(config);
-        this.configUri = config.getConfigUri().map(URI::create).orElse(null);
-        this.httpClient = httpClient;
+        this.configUri = config.getConfigUri().map(URI::create).orElseThrow(() -> new IllegalArgumentException("configUri not set"));
+        this.httpClient = requireNonNull(httpClient, "httpClient is null");
     }
 
     @Override
     protected String getRawJsonString()
     {
-        if (this.configUri == null) {
-            throw new IllegalArgumentException("hive.s3.security-mapping.config-uri file is not set");
+        Request request = prepareGet().setUri(configUri).build();
+        StringResponse response = httpClient.execute(request, createStringResponseHandler());
+        int status = response.getStatusCode();
+        if (status != HttpStatus.OK.code()) {
+            throw new IllegalStateException(format("Request to '%s' returned unexpected status code: '%d'", configUri, status));
         }
-        Request request = prepareGet().setUri(this.configUri).build();
-        StringResponseHandler.StringResponse response;
-        try {
-            response = httpClient.execute(request, createStringResponseHandler());
-            int status = response.getStatusCode();
-            if (200 <= status && status <= 299) {
-                return response.getBody();
-            }
-            throw new IllegalStateException(format("Request to '%s' returned unexpected status code: '%d'", this.configUri, status));
-        }
-        catch (RuntimeException ex) {
-            throw new IllegalStateException(format("Error while sending get request to '%s'", this.configUri), ex);
-        }
-    }
-
-    @Override
-    public boolean checkPreconditions()
-    {
-        return configUri != null;
+        return response.getBody();
     }
 }

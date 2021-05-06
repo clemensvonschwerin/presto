@@ -17,9 +17,8 @@ import io.airlift.log.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
-
-import static java.lang.String.format;
 
 public class FileBasedS3SecurityMappingsProvider
         extends S3SecurityMappingsProvider
@@ -30,27 +29,18 @@ public class FileBasedS3SecurityMappingsProvider
     public FileBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config)
     {
         super(config);
-        configFile = config.getConfigFile().orElse(null);
+        configFile = config.getConfigFile().orElseThrow(() -> new IllegalArgumentException("configFile not set"));
     }
 
     @Override
     public String getRawJsonString()
     {
-        if (this.configFile == null) {
-            throw new IllegalArgumentException("hive.s3.security-mapping.config-file is not set");
-        }
         log.info("Retrieving config from file %s", configFile);
         try {
             return Files.readString(configFile.toPath());
         }
-        catch (IOException ex) {
-            throw new IllegalStateException(format("Could not read file '%s', cause: '%s'", configFile.toPath(), ex.getMessage()));
+        catch (IOException e) {
+            throw new UncheckedIOException("Failed to read file: " + configFile, e);
         }
-    }
-
-    @Override
-    public boolean checkPreconditions()
-    {
-        return configFile != null;
     }
 }

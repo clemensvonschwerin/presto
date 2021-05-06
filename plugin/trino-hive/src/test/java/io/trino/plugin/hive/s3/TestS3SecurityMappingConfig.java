@@ -26,7 +26,6 @@ import static io.airlift.configuration.testing.ConfigAssertions.assertFullMappin
 import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
 import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.testng.Assert.assertEquals;
 
 public class TestS3SecurityMappingConfig
 {
@@ -35,19 +34,12 @@ public class TestS3SecurityMappingConfig
     {
         assertRecordedDefaults(recordDefaults(S3SecurityMappingConfig.class)
                 .setConfigUri(null)
-                .setJSONPointer("")
+                .setJsonPointer("")
                 .setConfigFile(null)
                 .setRoleCredentialName(null)
                 .setKmsKeyIdCredentialName(null)
                 .setRefreshPeriod(null)
                 .setColonReplacement(null));
-    }
-
-    @Test
-    public void testDefaultValues()
-    {
-        S3SecurityMappingConfig defaultConfig = new S3SecurityMappingConfig();
-        assertEquals(defaultConfig.getJSONPointer(), "");
     }
 
     @Test
@@ -68,7 +60,7 @@ public class TestS3SecurityMappingConfig
 
         S3SecurityMappingConfig expected = new S3SecurityMappingConfig()
                 .setConfigFile(securityMappingConfigFile.toFile())
-                .setJSONPointer("/data")
+                .setJsonPointer("/data")
                 .setConfigUri("http://test:1234/example")
                 .setRoleCredentialName("iam-role-credential-name")
                 .setKmsKeyIdCredentialName("kms-key-id-credential-name")

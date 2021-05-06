@@ -37,17 +37,6 @@ public class HiveS3Module
 {
     public static final String EMR_FS_CLASS_NAME = "com.amazon.ws.emr.hadoop.fs.EmrFileSystem";
 
-    private static void validateEmrFsClass()
-    {
-        // verify that the class exists
-        try {
-            Class.forName(EMR_FS_CLASS_NAME, true, JavaUtils.getClassLoader());
-        }
-        catch (ClassNotFoundException e) {
-            throw new RuntimeException("EMR File System class not found: " + EMR_FS_CLASS_NAME, e);
-        }
-    }
-
     @Override
     protected void setup(Binder binder)
     {
@@ -96,6 +85,17 @@ public class HiveS3Module
 
         checkArgument(!buildConfigObject(HiveConfig.class).isS3SelectPushdownEnabled(), "S3 security mapping is not compatible with S3 Select pushdown");
         checkArgument(!buildConfigObject(RubixEnabledConfig.class).isCacheEnabled(), "S3 security mapping is not compatible with Hive caching");
+    }
+
+    private static void validateEmrFsClass()
+    {
+        // verify that the class exists
+        try {
+            Class.forName(EMR_FS_CLASS_NAME, true, JavaUtils.getClassLoader());
+        }
+        catch (ClassNotFoundException e) {
+            throw new RuntimeException("EMR File System class not found: " + EMR_FS_CLASS_NAME, e);
+        }
     }
 
     public static class EmrFsS3ConfigurationInitializer

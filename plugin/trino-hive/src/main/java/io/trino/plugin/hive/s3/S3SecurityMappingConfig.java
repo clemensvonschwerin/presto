@@ -17,9 +17,9 @@ import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
 import io.airlift.configuration.validation.FileExists;
 import io.airlift.units.Duration;
-import org.codehaus.commons.nullanalysis.NotNull;
 
 import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotNull;
 
 import java.io.File;
 import java.util.Optional;
@@ -67,14 +67,14 @@ public class S3SecurityMappingConfig
     }
 
     @NotNull
-    public String getJSONPointer()
+    public String getJsonPointer()
     {
         return jsonPointer;
     }
 
     @Config("hive.s3.security-mapping.json-pointer")
     @ConfigDescription("JSON pointer (RFC 6901) to mappings inside JSON config")
-    public S3SecurityMappingConfig setJSONPointer(String jsonPointer)
+    public S3SecurityMappingConfig setJsonPointer(String jsonPointer)
     {
         this.jsonPointer = jsonPointer;
         return this;

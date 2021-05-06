@@ -27,7 +27,7 @@ public class TestS3SecurityMappingsProvider
     public void testParse()
     {
         S3SecurityMappingConfig conf = new S3SecurityMappingConfig()
-                .setJSONPointer("/data");
+                .setJsonPointer("/data");
 
         StubS3SecurityMappingsProvider provider = new StubS3SecurityMappingsProvider(conf);
         S3SecurityMappings mappings =
@@ -62,12 +62,6 @@ public class TestS3SecurityMappingsProvider
         protected String getRawJsonString()
         {
             return null;
-        }
-
-        @Override
-        public boolean checkPreconditions()
-        {
-            return false;
         }
     }
 }

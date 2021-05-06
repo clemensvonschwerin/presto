@@ -18,8 +18,6 @@ import io.airlift.http.client.Response;
 import io.airlift.http.client.testing.TestingHttpClient;
 import org.testng.annotations.Test;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import static com.google.common.net.MediaType.JSON_UTF_8;
 import static io.airlift.http.client.testing.TestingResponse.mockResponse;
 import static org.testng.Assert.assertEquals;
@@ -32,12 +30,12 @@ public class TestUriBasedS3SecurityMappingsProvider
     @Test
     public void testGetRawJSON()
     {
-        AtomicReference<Response> response = new AtomicReference<>(mockResponse(HttpStatus.OK, JSON_UTF_8, MOCK_MAPPINGS_RESPONSE));
+        final Response response = mockResponse(HttpStatus.OK, JSON_UTF_8, MOCK_MAPPINGS_RESPONSE);
         S3SecurityMappingConfig conf = new S3SecurityMappingConfig().setConfigUri("http://test:1234/api/endpoint");
         UriBasedS3SecurityMappingsProvider provider =
                 new UriBasedS3SecurityMappingsProvider(conf,
-                        new TestingHttpClient(request -> response.get()));
+                        new TestingHttpClient(request -> response));
         String result = provider.getRawJsonString();
-        assertEquals(MOCK_MAPPINGS_RESPONSE, result);
+        assertEquals(result, MOCK_MAPPINGS_RESPONSE);
     }
 }
