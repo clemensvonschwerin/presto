@@ -69,10 +69,7 @@ public class TestS3SecurityMappingConfig
 
     @Test
     public void testExplicitPropertyMappingsWithUrl()
-            throws IOException
     {
-        Path securityMappingConfigFile = Files.createTempFile(null, null);
-
         Map<String, String> properties = new ImmutableMap.Builder<String, String>()
                 .put("hive.s3.security-mapping.config-file", "http://test:1234/example")
                 .put("hive.s3.security-mapping.json-pointer", "/data")
