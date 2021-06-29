@@ -13,6 +13,7 @@
  */
 package io.trino.plugin.hive.s3;
 
+import com.google.inject.Inject;
 import io.airlift.http.client.HttpClient;
 import io.airlift.http.client.HttpStatus;
 import io.airlift.http.client.Request;
@@ -31,10 +32,11 @@ public class UriBasedS3SecurityMappingsProvider
     private final URI configUri;
     private final HttpClient httpClient;
 
+    @Inject
     public UriBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config, @ForS3SecurityMapping HttpClient httpClient)
     {
         super(config);
-        this.configUri = config.getConfigUri().map(URI::create).orElseThrow(() -> new IllegalArgumentException("configUri not set"));
+        this.configUri = config.getConfigFilePath().map(URI::create).orElseThrow(() -> new IllegalArgumentException("configUri not set"));
         this.httpClient = requireNonNull(httpClient, "httpClient is null");
     }
 

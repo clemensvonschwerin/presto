@@ -15,55 +15,32 @@ package io.trino.plugin.hive.s3;
 
 import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
-import io.airlift.configuration.validation.FileExists;
 import io.airlift.units.Duration;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
-import java.io.File;
 import java.util.Optional;
 
 public class S3SecurityMappingConfig
 {
-    private File configFile;
-    private String configUri;
+    private String configFilePath;
     private String jsonPointer = "";
     private String roleCredentialName;
     private String kmsKeyIdCredentialName;
     private Duration refreshPeriod;
     private String colonReplacement;
 
-    public Optional<@FileExists File> getConfigFile()
+    public Optional<String> getConfigFilePath()
     {
-        return Optional.ofNullable(configFile);
+        return Optional.ofNullable(configFilePath);
     }
 
     @Config("hive.s3.security-mapping.config-file")
     @ConfigDescription("JSON configuration file containing security mappings")
-    public S3SecurityMappingConfig setConfigFile(File configFile)
+    public S3SecurityMappingConfig setConfigFilePath(String configFilePath)
     {
-        this.configFile = configFile;
+        this.configFilePath = configFilePath;
         return this;
-    }
-
-    public Optional<String> getConfigUri()
-    {
-        return Optional.ofNullable(configUri);
-    }
-
-    @Config("hive.s3.security-mapping.config-uri")
-    @ConfigDescription("URI returning the security mappings as JSON")
-    public S3SecurityMappingConfig setConfigUri(String configUri)
-    {
-        this.configUri = configUri;
-        return this;
-    }
-
-    @AssertTrue(message = "Cannot set both hive.s3.security-mapping.config-file and hive.s3.security-mapping.config-uri")
-    public boolean atMostOneProvider()
-    {
-        return getConfigFile().isEmpty() || getConfigUri().isEmpty();
     }
 
     @NotNull

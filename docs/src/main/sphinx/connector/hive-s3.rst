@@ -189,9 +189,8 @@ In addition to the rules above, the default mapping can contain the optional
 
 If no mapping entry matches and no default is configured, the access is denied.
 
-The configuration JSON can either be retrieved from a file specified via
-``hive.s3.security-mapping.config-file`` or from a REST-endpoint specified via
-``hive.s3.security-mapping.config-uri``.
+The configuration JSON can either be retrieved from a file or REST-endpoint specified via
+``hive.s3.security-mapping.config-file``.
 
 Example JSON configuration:
 
@@ -238,10 +237,10 @@ Example JSON configuration:
 ======================================================= =================================================================
 Property Name                                           Description
 ======================================================= =================================================================
-``hive.s3.security-mapping.config-file``                The JSON configuration file containing security mappings.
-``hive.s3.security-mapping.config-uri``                 The URI to fetch the security mappings from (via REST).
-``hive.s3.security-mapping.json-pointer``               A JSON pointer (RFC 6901) to mappings inside the JSON from either
-                                                        the config file or the config URI. The whole document ("") by default.
+``hive.s3.security-mapping.config-file``                The JSON configuration file or REST-endpoint URI containing
+                                                        security mappings.
+``hive.s3.security-mapping.json-pointer``               A JSON pointer (RFC 6901) to mappings inside the JSON retrieved from
+                                                        the config file or REST-endpont. The whole document ("") by default.
 
 ``hive.s3.security-mapping.iam-role-credential-name``   The name of the *extra credential* used to provide the IAM role.
 

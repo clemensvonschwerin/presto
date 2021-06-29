@@ -65,16 +65,19 @@ public class HiveS3Module
 
     private void bindSecurityMapping(Binder binder)
     {
-        if (buildConfigObject(S3SecurityMappingConfig.class).getConfigFile().isPresent()) {
-            binder.bind(S3SecurityMappingsProvider.class).to(FileBasedS3SecurityMappingsProvider.class).in(Scopes.SINGLETON);
-        }
-        else if (buildConfigObject(S3SecurityMappingConfig.class).getConfigUri().isPresent()) {
-            binder.bind(S3SecurityMappingsProvider.class).to(UriBasedS3SecurityMappingsProvider.class).in(Scopes.SINGLETON);
-            httpClientBinder(binder).bindHttpClient("s3SecurityMapping", ForS3SecurityMapping.class)
-                    .withConfigDefaults(config -> config
-                            .setRequestTimeout(Duration.succinctDuration(10, TimeUnit.SECONDS))
-                            .setSelectorCount(1)
-                            .setMinThreads(1));
+        S3SecurityMappingConfig configuration = buildConfigObject(S3SecurityMappingConfig.class);
+        if (configuration.getConfigFilePath().isPresent()) {
+            if (isHttp(configuration)) {
+                binder.bind(S3SecurityMappingsProvider.class).to(UriBasedS3SecurityMappingsProvider.class).in(Scopes.SINGLETON);
+                httpClientBinder(binder).bindHttpClient("s3SecurityMapping", ForS3SecurityMapping.class)
+                        .withConfigDefaults(config -> config
+                                .setRequestTimeout(Duration.succinctDuration(10, TimeUnit.SECONDS))
+                                .setSelectorCount(1)
+                                .setMinThreads(1));
+            }
+            else {
+                binder.bind(S3SecurityMappingsProvider.class).to(FileBasedS3SecurityMappingsProvider.class).in(Scopes.SINGLETON);
+            }
         }
         else {
             return;
@@ -96,6 +99,11 @@ public class HiveS3Module
         catch (ClassNotFoundException e) {
             throw new RuntimeException("EMR File System class not found: " + EMR_FS_CLASS_NAME, e);
         }
+    }
+
+    private static boolean isHttp(S3SecurityMappingConfig config)
+    {
+        return config.getConfigFilePath().map(configFile -> configFile.startsWith("https://") || configFile.startsWith("http://")).orElse(false);
     }
 
     public static class EmrFsS3ConfigurationInitializer

@@ -31,7 +31,7 @@ public class TestUriBasedS3SecurityMappingsProvider
     public void testGetRawJSON()
     {
         final Response response = mockResponse(HttpStatus.OK, JSON_UTF_8, MOCK_MAPPINGS_RESPONSE);
-        S3SecurityMappingConfig conf = new S3SecurityMappingConfig().setConfigUri("http://test:1234/api/endpoint");
+        S3SecurityMappingConfig conf = new S3SecurityMappingConfig().setConfigFilePath("http://test:1234/api/endpoint");
         UriBasedS3SecurityMappingsProvider provider =
                 new UriBasedS3SecurityMappingsProvider(conf,
                         new TestingHttpClient(request -> response));

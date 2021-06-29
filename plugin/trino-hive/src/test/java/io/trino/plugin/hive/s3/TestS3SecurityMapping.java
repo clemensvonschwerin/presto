@@ -27,7 +27,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 
@@ -62,7 +61,7 @@ public class TestS3SecurityMapping
     public void testMapping()
     {
         S3SecurityMappingConfig mappingConfig = new S3SecurityMappingConfig()
-                .setConfigFile(new File(getResource(getClass(), "security-mapping.json").getPath()))
+                .setConfigFilePath(getResource(getClass(), "security-mapping.json").getPath())
                 .setRoleCredentialName(IAM_ROLE_CREDENTIAL_NAME)
                 .setKmsKeyIdCredentialName(KMS_KEY_ID_CREDENTIAL_NAME)
                 .setColonReplacement("#");
@@ -247,7 +246,7 @@ public class TestS3SecurityMapping
     public void testMappingWithFallbackToClusterDefault()
     {
         S3SecurityMappingConfig mappingConfig = new S3SecurityMappingConfig()
-                .setConfigFile(new File(getResource(getClass(), "security-mapping-with-fallback-to-cluster-default.json").getPath()));
+                .setConfigFilePath(getResource(getClass(), "security-mapping-with-fallback-to-cluster-default.json").getPath());
 
         DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig,
                 new FileBasedS3SecurityMappingsProvider(mappingConfig));
@@ -269,7 +268,7 @@ public class TestS3SecurityMapping
     public void testMappingWithoutFallback()
     {
         S3SecurityMappingConfig mappingConfig = new S3SecurityMappingConfig()
-                .setConfigFile(new File(getResource(getClass(), "security-mapping-without-fallback.json").getPath()));
+                .setConfigFilePath(getResource(getClass(), "security-mapping-without-fallback.json").getPath());
 
         DynamicConfigurationProvider provider = new S3SecurityMappingConfigurationProvider(mappingConfig,
                 new FileBasedS3SecurityMappingsProvider(mappingConfig));

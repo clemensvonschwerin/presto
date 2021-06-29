@@ -13,6 +13,7 @@
  */
 package io.trino.plugin.hive.s3;
 
+import com.google.inject.Inject;
 import io.airlift.log.Logger;
 
 import java.io.File;
@@ -26,10 +27,14 @@ public class FileBasedS3SecurityMappingsProvider
     private static final Logger log = Logger.get(FileBasedS3SecurityMappingsProvider.class);
     private final File configFile;
 
+    @Inject
     public FileBasedS3SecurityMappingsProvider(S3SecurityMappingConfig config)
     {
         super(config);
-        configFile = config.getConfigFile().orElseThrow(() -> new IllegalArgumentException("configFile not set"));
+        configFile = config.getConfigFilePath().map(File::new).orElseThrow(() -> new IllegalArgumentException("configFile not set"));
+        if (!configFile.exists()) {
+            throw new IllegalArgumentException(String.format("configFile %s does not exist", configFile.getAbsoluteFile()));
+        }
     }
 
     @Override
